@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PATIENT
+  DOCTOR
+  RECEPTIONIST
+  ADMIN
+}
+
+enum AppointmentStatus {
+  BOOKED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  phone        String?
+  passwordHash String
+  role         Role     @default(PATIENT)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  doctorProfile Doctor?
+  appointments  Appointment[] @relation("PatientAppointments")
+}
+
+model Department {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String
+  doctors     Doctor[]
+}
+
+model Doctor {
+  id              String     @id @default(cuid())
+  userId          String     @unique
+  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  departmentId    String
+  department      Department @relation(fields: [departmentId], references: [id])
+  qualification   String
+  bio             String
+  slotMinutes     Int        @default(30)
+  consultationFee Int        @default(0)
+
+  schedules    DoctorSchedule[]
+  appointments Appointment[]
+}
+
+model DoctorSchedule {
+  id        String @id @default(cuid())
+  doctorId  String
+  doctor    Doctor @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  weekday   Int // 0 = Sunday ... 6 = Saturday
+  startTime String // "HH:MM" 24h
+  endTime   String // "HH:MM" 24h
+
+  @@unique([doctorId, weekday, startTime])
+}
+
+model Appointment {
+  id        String            @id @default(cuid())
+  doctorId  String
+  doctor    Doctor            @relation(fields: [doctorId], references: [id])
+  patientId String
+  patient   User              @relation("PatientAppointments", fields: [patientId], references: [id])
+  startsAt  DateTime
+  endsAt    DateTime
+  reason    String
+  status    AppointmentStatus @default(BOOKED)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  // Database-level guard against double booking of the same doctor slot.
+  // (A partial unique index excluding cancelled rows is added in the migration SQL.)
+  @@index([doctorId, startsAt])
+  @@index([patientId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  to        String
+  channel   String // "EMAIL" | "SMS"
+  subject   String
+  body      String
+  sent      Boolean  @default(false)
+  error     String?
+  createdAt DateTime @default(now())
+}

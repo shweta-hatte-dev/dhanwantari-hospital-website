@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-white text-slate-800 antialiased;
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-outline {
+    @apply inline-flex items-center justify-center rounded-lg border border-brand-600 px-5 py-2.5 text-sm font-semibold text-brand-700 transition hover:bg-brand-50;
+  }
+  .input {
+    @apply w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100;
+  }
+  .card {
+    @apply rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md;
+  }
+}
+
+/* ---------- Animated CSS 3D hero (no external assets) ---------- */
+.scene {
+  perspective: 900px;
+  width: 220px;
+  height: 220px;
+}
+.cube {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  animation: spin 18s linear infinite;
+}
+.cube-face {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 110px;
+  font-weight: 800;
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  background: linear-gradient(135deg, rgba(5, 150, 105, 0.92), rgba(6, 78, 59, 0.92));
+  backface-visibility: hidden;
+}
+.cube-face.front  { transform: rotateY(0deg) translateZ(110px); }
+.cube-face.back   { transform: rotateY(180deg) translateZ(110px); }
+.cube-face.right  { transform: rotateY(90deg) translateZ(110px); }
+.cube-face.left   { transform: rotateY(-90deg) translateZ(110px); }
+.cube-face.top    { transform: rotateX(90deg) translateZ(110px); }
+.cube-face.bottom { transform: rotateX(-90deg) translateZ(110px); }
+
+@keyframes spin {
+  from { transform: rotateX(-20deg) rotateY(0deg); }
+  to   { transform: rotateX(-20deg) rotateY(360deg); }
+}
+
+.float {
+  animation: float 6s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+.reveal {
+  animation: reveal 0.7s ease-out both;
+}
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cube, .float, .reveal { animation: none; }
+}
